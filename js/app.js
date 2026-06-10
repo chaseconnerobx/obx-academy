@@ -26,44 +26,45 @@ const State = {
 // ─── APP CONTROLLER ───────────────────────────────────────────
 const App = {
 
-  GOOGLE_CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID',
-
   init() {
     Render.checkList();
-    window.onGoogleLibraryLoad = App.googleInit;
+    firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.auth().onAuthStateChanged(App._onAuthStateChanged);
   },
 
-  googleInit() {
-    google.accounts.id.initialize({
-      client_id: App.GOOGLE_CLIENT_ID,
-      callback: App.handleGoogleCredential,
-      hd: 'outerbox.com',
-    });
-    google.accounts.id.renderButton(
-      document.getElementById('googleSignInBtn'),
-      { theme: 'outline', size: 'large', width: 300, text: 'sign_in_with' }
-    );
-  },
-
-  handleGoogleCredential(response) {
-    const payload = JSON.parse(atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+  _onAuthStateChanged(user) {
+    if (!user) {
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('appShell').style.display   = 'none';
+      return;
+    }
     const err = document.getElementById('loginError');
-
-    if (!payload.email.endsWith('@outerbox.com')) {
+    if (!user.email.endsWith('@outerbox.com')) {
+      firebase.auth().signOut();
       err.textContent = 'Access restricted to @outerbox.com accounts.';
       err.style.display = 'block';
       return;
     }
-
     err.style.display = 'none';
-    const initials = payload.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    const nameParts = (user.displayName || user.email).split(' ');
+    const initials  = nameParts.map(n => n[0]).join('').slice(0, 2).toUpperCase();
     App._startSession({
-      email: payload.email,
-      name: payload.name,
-      init: initials,
-      picture: payload.picture,
-      role: 'learner',
+      email:     user.email,
+      name:      user.displayName || user.email,
+      init:      initials,
+      picture:   user.photoURL,
+      role:      'learner',
       roleLabel: 'Learner',
+    });
+  },
+
+  signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ hd: 'outerbox.com' });
+    firebase.auth().signInWithPopup(provider).catch(() => {
+      const err = document.getElementById('loginError');
+      err.textContent = 'Sign-in failed. Please try again.';
+      err.style.display = 'block';
     });
   },
 
@@ -94,9 +95,7 @@ const App = {
 
   logout() {
     State.currentUser = null;
-    google.accounts.id.disableAutoSelect();
-    document.getElementById('appShell').style.display    = 'none';
-    document.getElementById('loginScreen').style.display = 'flex';
+    firebase.auth().signOut();
   },
 
   navigate(page) {

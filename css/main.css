@@ -103,7 +103,24 @@ input, textarea, select { font-family: var(--font); }
   border-radius: var(--radius-md);
   border: 1px solid rgba(199,83,0,0.2);
 }
-.google-signin-wrap { display: flex; justify-content: center; margin-top: 0.5rem; }
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 42px;
+  background: var(--surface);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-1);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition);
+  margin-top: 0.5rem;
+}
+.btn-google:hover { background: var(--frost); border-color: var(--blue); }
 .login-demo { border-top: 1px solid var(--border); padding-top: 1.25rem; }
 .demo-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
 .demo-accounts { display: flex; gap: 8px; }

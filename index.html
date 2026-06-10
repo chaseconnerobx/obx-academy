@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OBx Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-logo">Outer<span>Box</span> Academy</div>
+      <p class="login-subtitle">Team training & development</p>
+      <div class="login-form">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="loginEmail" class="form-input" placeholder="you@outerbox.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" />
+        </div>
+        <div id="loginError" class="login-error" style="display:none"></div>
+        <button class="btn-primary btn-full" onclick="App.login()">Sign in</button>
+      </div>
+      <div class="login-demo">
+        <p class="demo-label">Demo accounts</p>
+        <div class="demo-accounts">
+          <button class="demo-btn" onclick="App.demoLogin('manager')"><i class="ti ti-briefcase"></i> Manager</button>
+          <button class="demo-btn" onclick="App.demoLogin('learner')"><i class="ti ti-user"></i> Learner</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP SHELL -->
+  <div id="appShell" class="app-shell" style="display:none">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" onclick="App.toggleSidebar()" aria-label="Toggle menu">
+          <i class="ti ti-menu-2"></i>
+        </button>
+        <div class="logo">Outer<span>Box</span> Academy</div>
+      </div>
+      <div class="topbar-right">
+        <span class="role-badge" id="roleBadge">Manager</span>
+        <div class="user-avatar" id="userAvatar">JD</div>
+        <button class="icon-btn" onclick="App.logout()" title="Sign out"><i class="ti ti-logout"></i></button>
+      </div>
+    </header>
+
+    <div class="app-body">
+
+      <!-- SIDEBAR -->
+      <nav class="sidebar" id="sidebar">
+        <div class="nav-section">
+          <div class="nav-label">Manager</div>
+          <button class="nav-item active" data-page="dashboard" onclick="App.navigate('dashboard')">
+            <i class="ti ti-layout-dashboard"></i> Dashboard
+          </button>
+          <button class="nav-item" data-page="team" onclick="App.navigate('team')">
+            <i class="ti ti-users"></i> Team
+            <span class="nav-badge">6</span>
+          </button>
+          <button class="nav-item" data-page="modules" onclick="App.navigate('modules')">
+            <i class="ti ti-book"></i> Module library
+          </button>
+          <button class="nav-item" data-page="submissions" onclick="App.navigate('submissions')">
+            <i class="ti ti-inbox"></i> Submissions
+            <span class="nav-badge" id="subNavBadge">4</span>
+          </button>
+        </div>
+        <div class="nav-section">
+          <div class="nav-label">My learning</div>
+          <button class="nav-item" data-page="assigned" onclick="App.navigate('assigned')">
+            <i class="ti ti-clipboard-list"></i> Assigned
+            <span class="nav-badge">3</span>
+          </button>
+          <button class="nav-item" data-page="progress" onclick="App.navigate('progress')">
+            <i class="ti ti-chart-line"></i> My progress
+          </button>
+        </div>
+      </nav>
+
+      <!-- MAIN CONTENT -->
+      <main class="main-content" id="mainContent">
+
+        <!-- DASHBOARD -->
+        <div class="page" id="page-dashboard">
+          <div class="page-head">
+            <h1 class="page-title">Team training overview</h1>
+            <p class="page-subtitle">Monitor progress, review submissions, and assign modules to your team.</p>
+          </div>
+          <div class="stats-row" id="dashStats"></div>
+          <h2 class="section-title">Team progress</h2>
+          <div class="team-list" id="dashTeam"></div>
+        </div>
+
+        <!-- MODULES -->
+        <div class="page" id="page-modules" style="display:none">
+          <div class="page-head">
+            <h1 class="page-title">Module library</h1>
+            <p class="page-subtitle">All training modules — click to open, preview, or assign to team members.</p>
+          </div>
+          <div class="module-grid" id="moduleGrid"></div>
+        </div>
+
+        <!-- TEAM -->
+        <div class="page" id="page-team" style="display:none">
+          <div class="page-head">
+            <h1 class="page-title">Team members</h1>
+            <p class="page-subtitle">Assign modules and track individual training progress.</p>
+          </div>
+          <div class="team-list" id="teamList"></div>
+        </div>
+
+        <!-- SUBMISSIONS -->
+        <div class="page" id="page-submissions" style="display:none">
+          <div class="page-head">
+            <h1 class="page-title">Submitted assignments</h1>
+            <p class="page-subtitle">Review written submissions from your team.</p>
+          </div>
+          <div id="submissionsList"></div>
+        </div>
+
+        <!-- ASSIGNED (LEARNER) -->
+        <div class="page" id="page-assigned" style="display:none">
+          <div class="page-head">
+            <h1 class="page-title">My assigned training</h1>
+            <p class="page-subtitle">Complete lessons and submit your assignment for each module.</p>
+          </div>
+          <div class="module-list" id="assignedList"></div>
+        </div>
+
+        <!-- PROGRESS (LEARNER) -->
+        <div class="page" id="page-progress" style="display:none">
+          <div class="page-head">
+            <h1 class="page-title">My progress</h1>
+            <p class="page-subtitle">Your training history and assignment scores.</p>
+          </div>
+          <div id="progressContent"></div>
+        </div>
+
+        <!-- LESSON -->
+        <div class="page" id="page-lesson" style="display:none">
+          <div class="lesson-wrap">
+            <div class="lesson-header">
+              <button class="back-btn" onclick="App.goBack()">
+                <i class="ti ti-arrow-left"></i> Back
+              </button>
+              <span class="lesson-title" id="lessonTitle">Module title</span>
+            </div>
+            <div class="lesson-tabs">
+              <button class="lesson-tab active" id="tabLearn" onclick="App.switchTab('learn')">
+                <i class="ti ti-book"></i> Lessons
+              </button>
+              <button class="lesson-tab" id="tabAssign" onclick="App.switchTab('assign')">
+                <i class="ti ti-pencil"></i> Assignment
+                <span class="tab-badge" id="assignTabBadge" style="display:none">!</span>
+              </button>
+            </div>
+
+            <!-- LEARN PANE -->
+            <div class="lesson-pane active" id="paneLearn">
+              <div class="topic-list" id="topicList"></div>
+              <div class="ai-lesson" id="aiLesson" style="display:none">
+                <div class="ai-lesson-header">
+                  <span class="ai-dot"></span>
+                  <span class="ai-label">AI-powered lesson — generated for your role</span>
+                </div>
+                <div class="ai-content" id="aiContent">
+                  <p class="placeholder-text">Select a lesson above, then click Generate to load the content.</p>
+                </div>
+                <div class="ai-lesson-footer">
+                  <button class="btn-primary" id="genBtn" onclick="Lesson.generate()">
+                    <i class="ti ti-sparkles"></i> Generate lesson content
+                  </button>
+                  <div id="lessonQuiz" style="display:none"></div>
+                  <button class="btn-success" id="markDoneBtn" style="display:none" onclick="Lesson.markDone()">
+                    <i class="ti ti-check"></i> Mark complete
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ASSIGNMENT PANE -->
+            <div class="lesson-pane" id="paneAssign">
+              <div id="assignmentContainer"></div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ASSIGN MODAL -->
+  <div class="modal-backdrop" id="assignModal" style="display:none" onclick="Modals.closeAssign(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Assign modules</h3>
+        <button class="icon-btn" onclick="Modals.closeAssign()"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="form-label" style="margin-bottom:10px">Select modules to assign:</p>
+        <div class="check-list" id="checkList"></div>
+        <button class="btn-primary btn-full" onclick="Modals.confirmAssign()">
+          <i class="ti ti-check"></i> Assign selected modules
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script src="data/modules.js"></script>
+  <script src="data/team.js"></script>
+  <script src="data/assignments.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/lesson.js"></script>
+  <script src="js/assignment.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/modals.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

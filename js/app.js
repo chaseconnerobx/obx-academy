@@ -61,10 +61,11 @@ const App = {
   signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ hd: 'outerbox.com' });
-    firebase.auth().signInWithPopup(provider).catch(() => {
+    firebase.auth().signInWithPopup(provider).catch(e => {
       const err = document.getElementById('loginError');
-      err.textContent = 'Sign-in failed. Please try again.';
+      err.textContent = e.message || 'Sign-in failed. Please try again.';
       err.style.display = 'block';
+      console.error('Firebase sign-in error:', e.code, e.message);
     });
   },
 

@@ -103,6 +103,7 @@ input, textarea, select { font-family: var(--font); }
   border-radius: var(--radius-md);
   border: 1px solid rgba(199,83,0,0.2);
 }
+.google-signin-wrap { display: flex; justify-content: center; margin-top: 0.5rem; }
 .login-demo { border-top: 1px solid var(--border); padding-top: 1.25rem; }
 .demo-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
 .demo-accounts { display: flex; gap: 8px; }

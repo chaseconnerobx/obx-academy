@@ -8,8 +8,3 @@ const TEAM = [
   { id: 'cp', init: 'CP', name: 'Casey P.',  role: 'PPC Manager',       progress: 0,  avatarBg: '#EAF3DE', avatarColor: '#3B6D11', assigned: [] },
 ];
 
-// Demo users for login
-const DEMO_USERS = {
-  manager: { email: 'manager@outerbox.com', password: 'demo', name: 'Jordan D.', init: 'JD', role: 'manager', roleLabel: 'Manager' },
-  learner: { email: 'sarah@outerbox.com',   password: 'demo', name: 'Sarah K.',  init: 'SK', role: 'learner', roleLabel: 'Learner' },
-};

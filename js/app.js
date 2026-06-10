@@ -26,31 +26,45 @@ const State = {
 // ─── APP CONTROLLER ───────────────────────────────────────────
 const App = {
 
+  GOOGLE_CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID',
+
   init() {
     Render.checkList();
-    // Stay on login until user logs in
+    window.onGoogleLibraryLoad = App.googleInit;
   },
 
-  login() {
-    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-    const pass  = document.getElementById('loginPassword').value;
-    const err   = document.getElementById('loginError');
-
-    const user = Object.values(DEMO_USERS).find(
-      u => u.email === email && u.password === pass
+  googleInit() {
+    google.accounts.id.initialize({
+      client_id: App.GOOGLE_CLIENT_ID,
+      callback: App.handleGoogleCredential,
+      hd: 'outerbox.com',
+    });
+    google.accounts.id.renderButton(
+      document.getElementById('googleSignInBtn'),
+      { theme: 'outline', size: 'large', width: 300, text: 'sign_in_with' }
     );
+  },
 
-    if (!user) {
-      err.textContent = 'Invalid email or password. Try the demo accounts below.';
+  handleGoogleCredential(response) {
+    const payload = JSON.parse(atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    const err = document.getElementById('loginError');
+
+    if (!payload.email.endsWith('@outerbox.com')) {
+      err.textContent = 'Access restricted to @outerbox.com accounts.';
       err.style.display = 'block';
       return;
     }
-    err.style.display = 'none';
-    App._startSession(user);
-  },
 
-  demoLogin(role) {
-    App._startSession(DEMO_USERS[role]);
+    err.style.display = 'none';
+    const initials = payload.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    App._startSession({
+      email: payload.email,
+      name: payload.name,
+      init: initials,
+      picture: payload.picture,
+      role: 'learner',
+      roleLabel: 'Learner',
+    });
   },
 
   _startSession(user) {
@@ -67,16 +81,22 @@ const App = {
     Render.moduleGrid();
     Render.assignedList();
 
+    // Hide manager nav for learners
+    if (user.role === 'learner') {
+      document.querySelectorAll('.nav-section')[0].style.display = 'none';
+    } else {
+      document.querySelectorAll('.nav-section')[0].style.display = '';
+    }
+
     // Default start page
     App.navigate(user.role === 'learner' ? 'assigned' : 'dashboard');
   },
 
   logout() {
     State.currentUser = null;
-    document.getElementById('appShell').style.display   = 'none';
+    google.accounts.id.disableAutoSelect();
+    document.getElementById('appShell').style.display    = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('loginEmail').value    = '';
-    document.getElementById('loginPassword').value = '';
   },
 
   navigate(page) {

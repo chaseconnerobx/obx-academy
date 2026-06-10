@@ -17,6 +17,7 @@ const MODULES = {
     ],
     assignType: 'both',
     revenueTag: 'Revenue-critical',
+    topicContent: ['', '', '', ''],
   },
   reporting: {
     key: 'reporting',
@@ -35,6 +36,7 @@ const MODULES = {
       'Closing with clear next steps',
     ],
     assignType: 'both',
+    topicContent: ['', '', '', '', ''],
   },
   ahrefs: {
     key: 'ahrefs',
@@ -51,6 +53,7 @@ const MODULES = {
       'Surfacing insights for reporting calls',
     ],
     assignType: 'mcq',
+    topicContent: ['', '', ''],
   },
   accuranker: {
     key: 'accuranker',
@@ -67,6 +70,7 @@ const MODULES = {
       'Segment-level trend analysis',
     ],
     assignType: 'mcq',
+    topicContent: ['', '', ''],
   },
   ga4: {
     key: 'ga4',
@@ -82,6 +86,7 @@ const MODULES = {
       'Framing annotations for clients',
     ],
     assignType: 'mcq',
+    topicContent: ['', ''],
   },
   crm: {
     key: 'crm',
@@ -100,6 +105,7 @@ const MODULES = {
     ],
     assignType: 'both',
     revenueTag: 'Retention-critical',
+    topicContent: ['', '', '', ''],
   },
   communication: {
     key: 'communication',
@@ -118,6 +124,7 @@ const MODULES = {
     ],
     assignType: 'both',
     revenueTag: 'Retention-critical',
+    topicContent: ['', '', '', ''],
   },
   difficult: {
     key: 'difficult',
@@ -135,5 +142,6 @@ const MODULES = {
     ],
     assignType: 'both',
     revenueTag: 'Retention-critical',
+    topicContent: ['', '', ''],
   },
 };

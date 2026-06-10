@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="css/main.css" />
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -54,7 +55,13 @@
 
       <!-- SIDEBAR -->
       <nav class="sidebar" id="sidebar">
-        <div class="nav-section">
+        <div class="nav-section" id="navAdmin" style="display:none">
+          <div class="nav-label">Admin</div>
+          <button class="nav-item" data-page="admin" onclick="App.navigate('admin')">
+            <i class="ti ti-shield"></i> Admin panel
+          </button>
+        </div>
+        <div class="nav-section" id="navManager">
           <div class="nav-label">Manager</div>
           <button class="nav-item active" data-page="dashboard" onclick="App.navigate('dashboard')">
             <i class="ti ti-layout-dashboard"></i> Dashboard
@@ -71,7 +78,7 @@
             <span class="nav-badge" id="subNavBadge">4</span>
           </button>
         </div>
-        <div class="nav-section">
+        <div class="nav-section" id="navLearner">
           <div class="nav-label">My learning</div>
           <button class="nav-item" data-page="assigned" onclick="App.navigate('assigned')">
             <i class="ti ti-clipboard-list"></i> Assigned
@@ -86,8 +93,22 @@
       <!-- MAIN CONTENT -->
       <main class="main-content" id="mainContent">
 
+        <!-- ADMIN PAGE -->
+        <div class="page" id="page-admin" style="display:none">
+          <div class="page-head">
+            <h1 class="page-title">Admin panel</h1>
+            <p class="page-subtitle">Manage team access levels and module content.</p>
+          </div>
+          <div class="admin-tabs">
+            <button class="admin-tab active" id="adminTabUsers" onclick="Admin.showTab('users')"><i class="ti ti-users"></i> Users</button>
+            <button class="admin-tab" id="adminTabModules" onclick="Admin.showTab('modules')"><i class="ti ti-book"></i> Modules</button>
+          </div>
+          <div id="adminPaneUsers"></div>
+          <div id="adminPaneModules" style="display:none"></div>
+        </div>
+
         <!-- DASHBOARD -->
-        <div class="page" id="page-dashboard">
+        <div class="page" id="page-dashboard" style="display:none">
           <div class="page-head">
             <h1 class="page-title">Team training overview</h1>
             <p class="page-subtitle">Monitor progress, review submissions, and assign modules to your team.</p>
@@ -166,17 +187,12 @@
               <div class="topic-list" id="topicList"></div>
               <div class="ai-lesson" id="aiLesson" style="display:none">
                 <div class="ai-lesson-header">
-                  <span class="ai-dot"></span>
-                  <span class="ai-label">AI-powered lesson — generated for your role</span>
+                  <span class="ai-label">Lesson</span>
                 </div>
                 <div class="ai-content" id="aiContent">
-                  <p class="placeholder-text">Select a lesson above, then click Generate to load the content.</p>
+                  <p class="placeholder-text">Select a lesson above to load the content.</p>
                 </div>
                 <div class="ai-lesson-footer">
-                  <button class="btn-primary" id="genBtn" onclick="Lesson.generate()">
-                    <i class="ti ti-sparkles"></i> Generate lesson content
-                  </button>
-                  <div id="lessonQuiz" style="display:none"></div>
                   <button class="btn-success" id="markDoneBtn" style="display:none" onclick="Lesson.markDone()">
                     <i class="ti ti-check"></i> Mark complete
                   </button>
@@ -224,6 +240,7 @@
   <script src="js/assignment.js"></script>
   <script src="js/render.js"></script>
   <script src="js/modals.js"></script>
+  <script src="js/admin.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

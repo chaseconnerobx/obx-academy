@@ -2,48 +2,40 @@
 const Lesson = {
   currentModule: null,
   currentTopic: null,
-  completedTopics: {}, // key: "moduleKey_topicIndex"
+  completedTopics: {},
 
-  selectTopic(index, name, el) {
+  async selectTopic(index, name, el) {
     document.querySelectorAll('.topic-item').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
     Lesson.currentTopic = { index, name };
 
-    const aiLesson = document.getElementById('aiLesson');
-    aiLesson.style.display = 'block';
-    document.getElementById('lessonQuiz').style.display = 'none';
+    document.getElementById('aiLesson').style.display = 'block';
     document.getElementById('markDoneBtn').style.display = 'none';
+    document.getElementById('aiContent').innerHTML = '<p class="placeholder-text">Loading…</p>';
 
-    const genBtn = document.getElementById('genBtn');
-    genBtn.style.display = 'inline-flex';
-    genBtn.disabled = false;
-    genBtn.innerHTML = '<i class="ti ti-sparkles"></i> Generate lesson content';
-
-    document.getElementById('aiContent').innerHTML = '<p class="placeholder-text">Click "Generate lesson content" to load this lesson.</p>';
-  },
-
-  async generate() {
-    const btn = document.getElementById('genBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="ti ti-loader spinning"></i> Generating…';
-    document.getElementById('aiContent').innerHTML = '<p class="placeholder-text">Loading lesson…</p>';
-
+    let content = '';
     try {
-      const raw = await API.call(
-        API.lessonPrompt(Lesson.currentModule, Lesson.currentTopic.name)
-      );
-      document.getElementById('aiContent').innerHTML = Lesson._formatLesson(raw);
-      btn.style.display = 'none';
-      document.getElementById('markDoneBtn').style.display = 'inline-flex';
-    } catch (e) {
-      document.getElementById('aiContent').innerHTML =
-        '<p style="color:var(--red-text)">Could not load lesson. Check your connection and try again.</p>';
-      btn.disabled = false;
-      btn.innerHTML = '<i class="ti ti-sparkles"></i> Generate lesson content';
+      const doc = await firebase.firestore().collection('moduleContent').doc(`${Lesson.currentModule}-${index}`).get();
+      if (doc.exists && doc.data().content) {
+        content = doc.data().content;
+      }
+    } catch (e) { /* fall through to local */ }
+
+    if (!content) {
+      const mod = MODULES[Lesson.currentModule];
+      content = (mod.topicContent && mod.topicContent[index]) || '';
     }
+
+    document.getElementById('aiContent').innerHTML = content
+      ? Lesson._formatLesson(content)
+      : '<p class="placeholder-text">Content coming soon — check back shortly.</p>';
+
+    document.getElementById('markDoneBtn').style.display = 'inline-flex';
   },
 
   _formatLesson(text) {
+    // If already HTML (starts with a tag), render directly
+    if (text.trim().startsWith('<')) return text;
     return text
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .split('\n\n')
@@ -63,7 +55,6 @@ const Lesson = {
     const key = `${Lesson.currentModule}_${Lesson.currentTopic.index}`;
     Lesson.completedTopics[key] = true;
 
-    // Update topic status icon
     const items = document.querySelectorAll('.topic-item');
     if (items[Lesson.currentTopic.index]) {
       items[Lesson.currentTopic.index].querySelector('.topic-status').textContent = '✅';
@@ -74,7 +65,6 @@ const Lesson = {
     btn.style.background = 'var(--green)';
     setTimeout(() => { btn.style.display = 'none'; btn.style.background = ''; }, 1600);
 
-    // Show assignment badge if all topics done
     const mod = MODULES[Lesson.currentModule];
     const allDone = mod.topics.every((_, i) => Lesson.completedTopics[`${Lesson.currentModule}_${i}`]);
     if (allDone) {

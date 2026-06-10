@@ -29,10 +29,10 @@ const App = {
   init() {
     Render.checkList();
     firebase.initializeApp(FIREBASE_CONFIG);
-    firebase.auth().onAuthStateChanged(App._onAuthStateChanged);
+    firebase.auth().onAuthStateChanged(user => App._onAuthStateChanged(user));
   },
 
-  _onAuthStateChanged(user) {
+  async _onAuthStateChanged(user) {
     if (!user) {
       document.getElementById('loginScreen').style.display = 'flex';
       document.getElementById('appShell').style.display   = 'none';
@@ -48,13 +48,36 @@ const App = {
     err.style.display = 'none';
     const nameParts = (user.displayName || user.email).split(' ');
     const initials  = nameParts.map(n => n[0]).join('').slice(0, 2).toUpperCase();
+
+    // Determine role from Firestore
+    let role = 'learner';
+    try {
+      const db = firebase.firestore();
+      const ref = db.collection('users').doc(user.email);
+      const snap = await ref.get();
+      if (snap.exists) {
+        role = snap.data().role || 'learner';
+      } else {
+        role = user.email === 'chasec@outerbox.com' ? 'admin' : 'learner';
+        await ref.set({
+          email: user.email,
+          name:  user.displayName || user.email,
+          role,
+          createdAt: new Date().toISOString(),
+        });
+      }
+    } catch (e) {
+      console.warn('Firestore lookup failed, defaulting to learner:', e);
+    }
+
+    const roleLabels = { admin: 'Admin', manager: 'Manager', learner: 'Learner' };
     App._startSession({
       email:     user.email,
       name:      user.displayName || user.email,
       init:      initials,
       picture:   user.photoURL,
-      role:      'learner',
-      roleLabel: 'Learner',
+      role,
+      roleLabel: roleLabels[role] || 'Learner',
     });
   },
 
@@ -83,15 +106,27 @@ const App = {
     Render.moduleGrid();
     Render.assignedList();
 
-    // Hide manager nav for learners
-    if (user.role === 'learner') {
-      document.querySelectorAll('.nav-section')[0].style.display = 'none';
-    } else {
-      document.querySelectorAll('.nav-section')[0].style.display = '';
-    }
+    // Show/hide nav sections based on role
+    const navAdmin   = document.getElementById('navAdmin');
+    const navManager = document.getElementById('navManager');
+    const navLearner = document.getElementById('navLearner');
 
-    // Default start page
-    App.navigate(user.role === 'learner' ? 'assigned' : 'dashboard');
+    if (user.role === 'admin') {
+      navAdmin.style.display   = '';
+      navManager.style.display = '';
+      navLearner.style.display = '';
+      App.navigate('admin');
+    } else if (user.role === 'manager') {
+      navAdmin.style.display   = 'none';
+      navManager.style.display = '';
+      navLearner.style.display = '';
+      App.navigate('dashboard');
+    } else {
+      navAdmin.style.display   = 'none';
+      navManager.style.display = 'none';
+      navLearner.style.display = '';
+      App.navigate('assigned');
+    }
   },
 
   logout() {
@@ -114,6 +149,7 @@ const App = {
     // Lazy renders
     if (page === 'submissions') Render.submissionsList();
     if (page === 'progress')    Render.progressPage();
+    if (page === 'admin')       Admin.init();
 
     if (page !== 'lesson') State.lastPage = page;
     State.currentPage = page;
@@ -143,13 +179,9 @@ const App = {
 
     // Reset lesson pane
     document.getElementById('aiLesson').style.display = 'none';
-    document.getElementById('lessonQuiz').style.display = 'none';
     document.getElementById('markDoneBtn').style.display = 'none';
     document.getElementById('aiContent').innerHTML =
-      '<p class="placeholder-text">Select a lesson above, then click Generate to load the content.</p>';
-    document.getElementById('genBtn').style.display = 'inline-flex';
-    document.getElementById('genBtn').disabled = false;
-    document.getElementById('genBtn').innerHTML = '<i class="ti ti-sparkles"></i> Generate lesson content';
+      '<p class="placeholder-text">Select a lesson above to load the content.</p>';
 
     // Reset tabs
     App.switchTab('learn');

@@ -89,14 +89,25 @@ const Admin = {
               ${m.topics.map((t, i) => `
                 <div class="admin-topic-editor">
                   <div class="admin-topic-label">${i + 1}. ${t}</div>
-                  <textarea class="admin-topic-textarea" id="topicta-${m.key}-${i}" rows="6">${(m.topicContent && m.topicContent[i]) || ''}</textarea>
-                  <button class="btn-primary btn-sm" onclick="Admin.saveTopic('${m.key}', ${i})">Save content</button>
-                  <span class="admin-save-status" id="savestatus-${m.key}-${i}"></span>
+                  <textarea class="admin-topic-textarea" id="topicta-${m.key}-${i}" rows="8" placeholder="Write lesson content here. Plain text or basic HTML supported."></textarea>
+                  <div class="admin-media-fields">
+                    <div class="admin-media-field">
+                      <div class="admin-media-label"><i class="ti ti-photo"></i> Screenshot URL (optional)</div>
+                      <input type="url" class="form-input" id="topicimg-${m.key}-${i}" placeholder="https://…" />
+                    </div>
+                    <div class="admin-media-field">
+                      <div class="admin-media-label"><i class="ti ti-video"></i> Loom video URL (optional)</div>
+                      <input type="url" class="form-input" id="topicvideo-${m.key}-${i}" placeholder="https://www.loom.com/share/…" />
+                    </div>
+                  </div>
+                  <div class="admin-topic-actions">
+                    <button class="btn-primary btn-sm" onclick="Admin.saveTopic('${m.key}', ${i})">Save</button>
+                    <span class="admin-save-status" id="savestatus-${m.key}-${i}"></span>
+                  </div>
                 </div>`).join('')}
             </div>
           </div>`).join('')}
       </div>`;
-    // Load any saved content from Firestore
     Admin._loadModuleContent();
   },
 
@@ -104,27 +115,37 @@ const Admin = {
     try {
       const snap = await firebase.firestore().collection('moduleContent').get();
       snap.docs.forEach(doc => {
-        const ta = document.getElementById(`topicta-${doc.id}`);
-        if (ta) ta.value = doc.data().content || '';
+        const d = doc.data();
+        const ta    = document.getElementById(`topicta-${doc.id}`);
+        const img   = document.getElementById(`topicimg-${doc.id}`);
+        const video = document.getElementById(`topicvideo-${doc.id}`);
+        if (ta)    ta.value    = d.content  || '';
+        if (img)   img.value   = d.imageUrl || '';
+        if (video) video.value = d.videoUrl || '';
       });
     } catch (e) { /* ignore */ }
   },
 
   toggleModule(key, headerEl) {
-    const pane = document.getElementById(`modtopics-${key}`);
+    const pane    = document.getElementById(`modtopics-${key}`);
     const chevron = headerEl.querySelector('.admin-chevron');
-    const isOpen = pane.style.display !== 'none';
-    pane.style.display = isOpen ? 'none' : 'block';
-    chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+    const isOpen  = pane.style.display !== 'none';
+    pane.style.display       = isOpen ? 'none' : 'block';
+    chevron.style.transform  = isOpen ? '' : 'rotate(180deg)';
   },
 
   async saveTopic(key, index) {
-    const ta = document.getElementById(`topicta-${key}-${index}`);
+    const ta     = document.getElementById(`topicta-${key}-${index}`);
+    const img    = document.getElementById(`topicimg-${key}-${index}`);
+    const video  = document.getElementById(`topicvideo-${key}-${index}`);
     const status = document.getElementById(`savestatus-${key}-${index}`);
-    const content = ta.value;
     status.textContent = 'Saving…';
     try {
-      await firebase.firestore().collection('moduleContent').doc(`${key}-${index}`).set({ content });
+      await firebase.firestore().collection('moduleContent').doc(`${key}-${index}`).set({
+        content:  ta.value,
+        imageUrl: img.value.trim(),
+        videoUrl: video.value.trim(),
+      });
       status.textContent = 'Saved ✓';
       setTimeout(() => { status.textContent = ''; }, 2000);
       App.toast('Content saved');

@@ -13,11 +13,14 @@ const Lesson = {
     document.getElementById('markDoneBtn').style.display = 'none';
     document.getElementById('aiContent').innerHTML = '<p class="placeholder-text">Loading…</p>';
 
-    let content = '';
+    let content = '', imageUrl = '', videoUrl = '';
     try {
       const doc = await firebase.firestore().collection('moduleContent').doc(`${Lesson.currentModule}-${index}`).get();
-      if (doc.exists && doc.data().content) {
-        content = doc.data().content;
+      if (doc.exists) {
+        const d = doc.data();
+        content  = d.content  || '';
+        imageUrl = d.imageUrl || '';
+        videoUrl = d.videoUrl || '';
       }
     } catch (e) { /* fall through to local */ }
 
@@ -26,10 +29,19 @@ const Lesson = {
       content = (mod.topicContent && mod.topicContent[index]) || '';
     }
 
-    document.getElementById('aiContent').innerHTML = content
+    let html = content
       ? Lesson._formatLesson(content)
       : '<p class="placeholder-text">Content coming soon — check back shortly.</p>';
 
+    if (imageUrl) {
+      html += `<img src="${imageUrl}" class="lesson-screenshot" alt="Screenshot" />`;
+    }
+    if (videoUrl) {
+      const embedUrl = videoUrl.replace('loom.com/share/', 'loom.com/embed/');
+      html += `<div class="lesson-video-wrap"><iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe></div>`;
+    }
+
+    document.getElementById('aiContent').innerHTML = html;
     document.getElementById('markDoneBtn').style.display = 'inline-flex';
   },
 

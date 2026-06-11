@@ -171,6 +171,10 @@
                 <i class="ti ti-arrow-left"></i> Back
               </button>
               <span class="lesson-title" id="lessonTitle">Module title</span>
+              <span class="lesson-progress-label" id="lessonProgressLabel"></span>
+            </div>
+            <div class="lesson-progress-wrap">
+              <div class="lesson-progress-bar" id="lessonProgressBar" style="width:0%"></div>
             </div>
             <div class="lesson-tabs">
               <button class="lesson-tab active" id="tabLearn" onclick="App.switchTab('learn')">
@@ -186,12 +190,7 @@
             <div class="lesson-pane active" id="paneLearn">
               <div class="topic-list" id="topicList"></div>
               <div class="ai-lesson" id="aiLesson" style="display:none">
-                <div class="ai-lesson-header">
-                  <span class="ai-label">Lesson</span>
-                </div>
-                <div class="ai-content" id="aiContent">
-                  <p class="placeholder-text">Select a lesson above to load the content.</p>
-                </div>
+                <div class="ai-content" id="aiContent"></div>
                 <div class="ai-lesson-footer">
                   <button class="btn-success" id="markDoneBtn" style="display:none" onclick="Lesson.markDone()">
                     <i class="ti ti-check"></i> Mark complete
@@ -225,6 +224,16 @@
           <i class="ti ti-check"></i> Assign selected modules
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- COMPLETION BADGE -->
+  <div class="badge-overlay" id="badgeOverlay" style="display:none" onclick="Lesson.closeBadge()">
+    <div class="badge-card" onclick="event.stopPropagation()">
+      <div class="badge-icon">🎉</div>
+      <h2 class="badge-title">Module complete!</h2>
+      <p class="badge-sub" id="badgeSub"></p>
+      <button class="btn-primary" onclick="Lesson.closeBadge()">Keep going</button>
     </div>
   </div>
 
